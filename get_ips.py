@@ -35,7 +35,8 @@ with open('list.xml') as file:
 ips = []
 
 # find all ips with subnet if present
-for ip in re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(?:/[0-9]+)?', listxml):
+#for ip in re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(?:/[0-9]+)?', listxml):
+for ip in re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}', listxml):
 	ignore = False
 	for ignoreip in ignored:
 		if ip.startswith(ignoreip):
