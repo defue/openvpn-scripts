@@ -42,3 +42,9 @@ pip3 install anytree
 ```
 
 then clone the repository and run doall.sh
+
+add to cron, no need to reload openvpn as routes are updated automatically
+```
+crontab -e
+00 6 * * *  /home/openvpn-scripts/doall.sh # run the script at 6 a.m. everyday
+```
