@@ -28,6 +28,9 @@ ips += [
 	'91.225.248.0/24',
 	# rutracker.org and bt3.t-ru.org trackers
 	'195.82.146.0/24',
+	# telegram
+	'149.154.167.0/24',
+	'149.154.174.0/24',
 ]
 
 # deduplicate
