@@ -22,11 +22,15 @@ push "redirect-gateway def1 bypass-dhcp"
 
 comment all 'push "dhcp-option DNS' lines and add google DNS with routes
 ```
-# Google public DNS
+# Google public DNS - main
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 push "route 8.8.8.8 255.255.255.255"
 push "route 8.8.4.4 255.255.255.255"
+
+# Yandex family DNS - optional
+push "route 77.88.8.7 255.255.255.255"
+push "route 77.88.8.3 255.255.255.255"
 ```
 
 restart openvpn

@@ -4,7 +4,9 @@ import re
 import ipaddress
 from anytree import Node, RenderTree
 
-max_routes = 8192
+from network_tree import build_network_tree
+
+max_routes = 1024
 
 ignored = [
 	'127.0.0.1',
@@ -35,8 +37,7 @@ with open('list.xml') as file:
 ips = []
 
 # find all ips with subnet if present
-#for ip in re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(?:/[0-9]+)?', listxml):
-for ip in re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}', listxml):
+for ip in re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(?:/[0-9]+)?', listxml):
 	ignore = False
 	for ignoreip in ignored:
 		if ip.startswith(ignoreip):
@@ -59,56 +60,13 @@ for ip in ips:
 
 print('Total blocked ips: %d  or %g%% of overall ip4 amount' % (blocked, round(blocked * 100 / ips_count_in_subnet(ipaddress.IPv4Network('0.0.0.0/0')), 1)))
 
-
-nodes = []
-#subnets = []
-for ip in ips:
-	net = ipaddress.IPv4Network(ip)
-	net.__setattr__('is_from_ips_list', True) # set custom attribute
-	nodes.append(Node(net))
-	# if net.prefixlen != 32:
-	# 	subnets.append(net)
-
-# remove ips that belongs to subnets
-# for net in nodes:
-
-print()
-print('Generating network tree')
-for i in reversed(range(32)):
-	parent_nodes = {} # use dictionary for better efficiency
-	for node in nodes:
-		# merge node and its child if there is only 1 child, don't merge nodes taken from the ip list
-		if not node.name.is_from_ips_list and len(node.children) == 1:
-			node = node.children[0]
-		# remove children for nodes from the list
-		if node.name.is_from_ips_list:
-			node.children = []
-		net = node.name
-		if net.prefixlen > i:
-			# search for a suitable parent node in parent_nodes
-			parent_net = net.supernet(new_prefix=i)
-			parent_node = parent_nodes.get(parent_net.with_prefixlen)
-			if parent_node:
-				node.parent = parent_node
-			else:
-				# not found
-				parent_net.__setattr__('is_from_ips_list', False)
-				parent_node = Node(parent_net)
-				node.parent = parent_node
-				parent_nodes[parent_net.with_prefixlen] = parent_node
-		else:
-			# skip searching for a parent node for higher order subnets
-			parent_nodes[node.name.with_prefixlen] = node
-	nodes = list(parent_nodes.values())
-	print(' - subnet prefix %d nodes: %d' % (i, len(nodes)))
-
-# print tree
-# for pre, fill, node in RenderTree(nodes[0]): print("%s%s" % (pre, node.name))
+nodes = [build_network_tree(ips, verbose=True)]
 
 print()
 print('Calculating routes...')
 # expand tree until max_routes is reached
 while len(nodes) < max_routes:
+	# find net/node with min prefixlen
 	index, node = min(enumerate(nodes), key=lambda e: e[1].name.prefixlen if len(e[1].children) > 0 else 32)
 	if len(node.children) == 0:
 		break

@@ -3,6 +3,8 @@
 import re
 import ipaddress
 
+from custom_ips import ips as custom_ips
+
 def ips_count_in_subnet(subnet):
 	i = 32 - subnet.prefixlen
 	return max(pow(2, i) - 2, 1)
@@ -15,23 +17,10 @@ ips = []
 for ip in re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}', listxml):
 	ips.append(ip)
 
-print('IPs read: %d' % len(ips))
+# add custom ips
+ips += custom_ips
 
-# add manual ips
-ips += [
-	# linkedin.com
-	'185.63.144.0/24',
-	'185.63.145.0/24',
-	'108.174.10.10/32',
-	'108.174.11.0/24',
-	'108.174.5.0/24',
-	'91.225.248.0/24',
-	# rutracker.org and bt3.t-ru.org trackers
-	'195.82.146.0/24',
-	# telegram
-	'149.154.167.0/24',
-	'149.154.174.0/24',
-]
+print('IPs read: %d' % len(ips))
 
 # deduplicate
 ips = list(set(ips))
